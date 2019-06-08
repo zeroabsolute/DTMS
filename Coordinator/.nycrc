@@ -1,0 +1,22 @@
+{
+  "nyc": {
+    "all": true,
+    "include": [
+      "src/server"
+    ],
+    "exclude": [
+      "**/*.test.js"
+    ],
+    "require": [
+      "babel-register"
+    ],
+    "reporter": [
+      "json",
+      "lcov",
+      "html",
+      "text"
+    ],
+    "check-coverage": true,
+    "per-file": false
+  }
+}

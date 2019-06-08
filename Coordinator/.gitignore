@@ -1,0 +1,17 @@
+lib-cov
+test-only.div
+
+.lock-wscript
+
+/dist
+dist/
+
+node_modules
+
+logs/*.log
+
+.env
+
+.DS_Store
+
+build/
