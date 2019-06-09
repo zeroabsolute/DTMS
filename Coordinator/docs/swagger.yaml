@@ -2,7 +2,7 @@ swagger: "2.0"
 
 info:
   version: "0.0.1"
-  title: "DTMS"
+  title: "DTMS API"
   termsOfService: "-"
   contact:
     email: "geraldhaxhi@outlook.com"
