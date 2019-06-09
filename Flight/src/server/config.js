@@ -8,12 +8,14 @@ if (
   envConfig &&
   envConfig.APP_NAME &&
   envConfig.SERVER_URL &&
-  envConfig.PORT
+  envConfig.PORT &&
+  envConfig.MONGO_URL
 ) {
   config = {
     appName: envConfig.APP_NAME,
     serverUrl: envConfig.SERVER_URL,
     port: envConfig.PORT,
+    mongoUrl: envConfig.MONGO_URL,
   };
 }
 
