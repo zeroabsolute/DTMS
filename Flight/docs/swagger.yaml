@@ -2,7 +2,7 @@ swagger: "2.0"
 
 info:
   version: "0.0.1"
-  title: "Hotel Service API"
+  title: "Flight Service API"
   termsOfService: "-"
   contact:
     email: "geraldhaxhi@outlook.com"
