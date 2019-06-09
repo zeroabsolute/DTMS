@@ -7,15 +7,11 @@ test-only.div
 dist/
 
 node_modules
-Coordinator/node_modules
-Coordinator/dist
 
-*.log
+logs/*.log
 
 .env
 
 .DS_Store
 
 build/
-
-Notes

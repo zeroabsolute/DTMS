@@ -1,0 +1,75 @@
+swagger: "2.0"
+
+info:
+  version: "0.0.1"
+  title: "DTMS"
+  termsOfService: "-"
+  contact:
+    email: "geraldhaxhi@outlook.com"
+    
+host: "localhost:8080"
+
+basePath: "/api/v1"
+
+schemes:
+- "http"
+- "https"
+   
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+paths:
+  /health:
+    get:
+      tags: 
+        - Health
+      summary: Get server status
+      responses:
+        200:
+          description: Server OK
+          
+definitions:
+  Error:
+    properties:
+      code:
+        type: number
+      message: 
+        type: string
+  ValidationError:
+    properties:
+      isJoi:
+        type: boolean
+      name:
+        type: string
+        enum: [ValidationError]
+      details:
+        type: array
+        items:
+          type: object
+          properties:
+            message:
+              type: string
+            path:
+              type: array
+              items: 
+                type: string
+            type:
+              type: string
+            context:
+              type: object
+        
+responses:
+  400:
+    description: Validation error
+    schema:
+      $ref: "#/definitions/ValidationError"
+  401:
+    description: Unauthorized
+  500:
+    description: Internal Server Error
+    schema:
+      $ref: "#/definitions/Error"
