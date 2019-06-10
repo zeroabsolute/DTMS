@@ -7,6 +7,7 @@ import cors from 'cors';
 
 import serverRoutes from './routes/_index';
 import serverConfig from './config';
+import loggerService from './logger';
 
 // Init swagger docs
 const swaggerDocument = require('../../docs/swagger.json');
@@ -18,6 +19,9 @@ const docs = swaggerJsdoc({
 // Initialize the Express App and http server
 export const app = express();
 const server = require('http').Server(app);
+
+// Initialize logging mechanism
+loggerService.initLoggerService();
 
 // Apply body Parser and server public assets and routes
 app.use(compression());

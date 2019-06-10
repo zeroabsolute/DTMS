@@ -10,8 +10,7 @@
     "start:dev": "cross-env BABEL_DISABLE_CACHE=1 NODE_ENV=development nodemon index.js --exec babel-node --presets es2015,stage-2",
     "start:prod": "cross-env NODE_ENV=production node index.js",
     "build": "npm run test && npm run clean && cross-env NODE_ENV=production ./node_modules/babel-cli/bin/babel.js src --out-dir ./dist && cp -R src/email_templates dist/email_templates",
-    "clean": "rimraf dist",
-    "seed": "node --require babel-register ./migrations/index.seed.js"
+    "clean": "rimraf dist"
   },
   "pre-commit": [],
   "license": "MIT",
@@ -27,10 +26,12 @@
     "express": "^4.16.4",
     "express-basic-auth": "^1.2.0",
     "moment": "^2.24.0",
-    "mongoose": "^5.5.3",
+    "mysql2": "^1.6.5",
     "passport": "^0.4.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
+    "sequelize": "^5.8.7",
+    "sequelize-cli": "^5.4.0",
     "swagger-jsdoc": "^3.2.9",
     "swagger-ui-express": "^4.0.2"
   },

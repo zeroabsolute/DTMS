@@ -10,7 +10,7 @@ const Schema = mongoose.Schema;
  *    type: object
  *    required:
  *      - _id
- *      - dateCreated
+ *      - createdAt
  *      - userId
  *      - hotelId
  *      - roomId
@@ -18,7 +18,7 @@ const Schema = mongoose.Schema;
  *    properties:
  *      _id:
  *        type: string
- *      dateCreated:
+ *      createdAt:
  *        type: string
  *      userId:
  *        type: string
@@ -31,7 +31,7 @@ const Schema = mongoose.Schema;
  */
 
 const bookingSchema = new Schema({
-  dateCreated: { type: 'Date', default: Date.now, required: true },
+  createdAt: { type: 'Date', default: Date.now, required: true },
   datetime: { type: 'Date', required: true },
   userId: { type: 'String', required: true },
   hotelId: { type: 'String', required: true },
