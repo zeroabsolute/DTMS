@@ -1,5 +1,7 @@
 import cuid from 'cuid';
 
+import TransactionLog from '../models/transaction_log';
+import states from '../constants/states';
 import logger from '../logger';
 
 /**
@@ -26,64 +28,7 @@ import logger from '../logger';
  *              callbackUrl:
  *                type: string
  *              transaction:
- *                type: array
- *                items:
- *                  type: object
- *                  properties:
- *                    index:
- *                      type: number
- *                    operation:
- *                      type: object
- *                      properties:
- *                        method:
- *                          type: string
- *                          enum: [POST]
- *                        url:
- *                          type: string
- *                        params:
- *                          type: object
- *                        dependencies:
- *                          type: array
- *                          items:
- *                            properties:
- *                              fromStep:
- *                                type: number
- *                              fromAction:
- *                                type: string
- *                                enum: [operation, compensation]
- *                              paramType:
- *                                type: string
- *                                enum: [path, body, query]
- *                              inputParamKey:
- *                                type: string
- *                              outputParamKey:
- *                                type: string
- *                    compensation:
- *                      type: object
- *                      properties:
- *                        method:
- *                          type: string
- *                          enum: [POST, PUT, DELETE, PATCH, GET]
- *                        url:
- *                          type: string
- *                        params:
- *                          type: object
- *                        dependencies:
- *                          type: array
- *                          items:
- *                            properties:
- *                              fromStep:
- *                                type: number
- *                              fromAction:
- *                                type: string
- *                                enum: [operation, compensation]
- *                              paramType:
- *                                type: string
- *                                enum: [path, body, query]
- *                              inputParamKey:
- *                                type: string
- *                              outputParamKey:
- *                                type: string
+ *                $ref: "#/definitions/TransactionInput"
  *      responses:
  *        200:
  *          description: Request processed successfully
@@ -100,6 +45,18 @@ import logger from '../logger';
 export const openSession = async (req, res) => {
   try {
     const sessionId = cuid();
+    const input = req.body;
+    const output = initLogOutput(req.body.transaction);
+    const status = initLogStatus(req.body.transaction);
+
+    const transactionLog = new TransactionLog({
+      transactionCuid: sessionId,
+      input,
+      output,
+      status,
+    });
+
+    await transactionLog.save();
 
     res.status(200).json({
       sessionId,
@@ -109,3 +66,25 @@ export const openSession = async (req, res) => {
     res.status(500).json(e);
   }
 };
+
+/**
+ * Helper to initialize log output
+ */
+
+function initLogOutput(input) {
+  return input.map((item) => ({
+    index: item.index,
+    result: {},
+  }));
+}
+
+/**
+ * Helper to initialize log status
+ */
+
+function initLogStatus(input) {
+  return input.map((item) => ({
+    index: item.index,
+    state: states.PENDING,
+  }));
+}
