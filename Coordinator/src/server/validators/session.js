@@ -11,14 +11,12 @@ export const openSessionValidator = (req, res, next) => {
   const allowedOperationMethods = Object.values(methods.allowedOperationMethods);
   const allowedCompensationMethods = Object.values(methods.allowedCompensationMethods);
   const allowedParamTypes = Object.values(paramTypes);
-  const allowedActions = ['operation', 'compensation'];
   const transactionSteps = req.body.transaction ? req.body.transaction.length : 0;
 
   /* Schemas for params */
 
   const dependencyItemSchema = Joi.object().keys({
     fromStep: Joi.number().integer().min(1).max(transactionSteps).required(),
-    fromAction: Joi.string().valid(allowedActions).required(),
     paramType: Joi.string().valid(allowedParamTypes).required(),
     inputParamKey: Joi.string().required(),
     outputParamKey: Joi.string(),

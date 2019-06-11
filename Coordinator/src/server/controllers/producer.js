@@ -13,7 +13,7 @@ let queue = null;
  */
 
 export const createJob = (name, params, priority) => {
-  return queue.create(name, params).priority(priority).save();
+  return queue.create(name, params).priority(priority).removeOnComplete(true).save();
 };
 
 /**
@@ -38,3 +38,9 @@ export default () => {
   `);
   });
 };
+
+/**
+ * Return queue.
+ */
+
+export const getQueue = () => queue;

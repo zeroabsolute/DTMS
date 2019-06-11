@@ -31,9 +31,6 @@ const Schema = mongoose.Schema;
  *                properties:
  *                  fromStep:
  *                    type: number
- *                  fromAction:
- *                    type: string
- *                    enum: [operation, compensation]
  *                  paramType:
  *                    type: string
  *                    enum: [path, body, query]
@@ -57,9 +54,6 @@ const Schema = mongoose.Schema;
  *                properties:
  *                  fromStep:
  *                    type: number
- *                  fromAction:
- *                    type: string
- *                    enum: [operation, compensation]
  *                  paramType:
  *                    type: string
  *                    enum: [path, body, query]
@@ -123,14 +117,12 @@ const Schema = mongoose.Schema;
  * different transaction steps.
  * 
  * @param fromStep: Index of the transaction step
- * @param fromAction: Either 'operation' or 'compensation' (which part of the transaction step)
  * @param paramType: Param type specification according to openAPI: [body, path, query]
- * @param inputParamKey: The name of the param, as returned by the previos step ~ (fromStep['fromAction'])
+ * @param inputParamKey: The name of the param, as returned by the previous step
  * @param outputParamKey: The name of the param that will be passed to the current step request
  */
 const dependenciesSchema = {
   fromStep: { type: 'Number', required: true },
-  fromAction: { type: 'String', required: true },
   paramType: { type: 'String', required: true },
   inputParamKey: { type: 'String', required: true },
   outputParamKey: { type: 'String', required: false },
