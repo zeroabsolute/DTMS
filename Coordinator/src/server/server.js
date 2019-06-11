@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import swaggerUI from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import cors from 'cors';
+import mongoose from 'mongoose';
 
 import serverRoutes from './routes/_index';
 import serverConfig from './config';
@@ -22,6 +23,25 @@ const server = require('http').Server(app);
 
 // Initialize logging mechanism
 loggerService.initLoggerService();
+
+// Mongoose setup
+mongoose.Promise = global.Promise;
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+
+// MongoDB Connection
+mongoose.connect(serverConfig.mongoUrl, {
+  useNewUrlParser: true,
+  reconnectTries: 120,
+  connectTimeoutMS: 500,
+  autoReconnect: true,
+  poolSize: 20,
+}).then((db) => {
+}).catch(function (err) {
+  loggerService.getLogger().fatal('Please make sure Mongodb is installed and running!');
+  throw err;
+});
 
 // Apply body Parser and server public assets and routes
 app.use(compression());
