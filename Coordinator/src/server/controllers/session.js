@@ -1,7 +1,7 @@
 import cuid from 'cuid';
 
 import TransactionLog from '../models/transaction_log';
-import states from '../constants/states';
+import * as states from '../constants/states';
 import logger from '../logger';
 
 /**
@@ -54,6 +54,7 @@ export const openSession = async (req, res) => {
       input,
       output,
       status,
+      overallStatus: states.transactionState.PENDING,
     });
 
     await transactionLog.save();
@@ -85,6 +86,6 @@ function initLogOutput(input) {
 function initLogStatus(input) {
   return input.map((item) => ({
     index: item.index,
-    state: states.PENDING,
+    state: states.transactionStepState.PENDING,
   }));
 }

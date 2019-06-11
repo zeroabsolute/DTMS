@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-import states from '../constants/states';
+import * as states from '../constants/states';
 
 const Schema = mongoose.Schema;
 
@@ -96,6 +96,7 @@ const Schema = mongoose.Schema;
  *      - input
  *      - output
  *      - status
+ *      - overallStatus
  *    properties:
  *      _id:
  *        type: string
@@ -111,6 +112,9 @@ const Schema = mongoose.Schema;
  *        $ref: "#/definitions/TransactionOutput"
  *      status:
  *        $ref: "#/definitions/TransactionStatus"
+ *      overallStatus:
+ *        type: string
+ *        enum: [pending, ongoing, finished]
  */
 
 
@@ -147,6 +151,7 @@ const dependenciesSchema = {
  * @param status: Status for each transaction step
  *    @param status[i].index
  *    @param status[i].state: [pending, started, succeeded, failed]
+ * @param overallStatus: Overall status for the whole transaction: [pending, ongoing, finished]
  */
 
 const transactionLogSchema = new Schema(
@@ -183,10 +188,16 @@ const transactionLogSchema = new Schema(
         index: { type: 'Number', required: true },
         state: {
           type: 'String',
-          enum: Object.values(states),
+          enum: Object.values(states.transactionStepState),
+          required: true,
         }
       }
-    ]
+    ],
+    overallStatus: { 
+      type: 'String', 
+      required: true,
+      enum: Object.values(states.transactionState),
+    }
   }, {
     timestamps: {
       createdAt: 'createdAt',
