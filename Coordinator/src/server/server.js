@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import serverRoutes from './routes/_index';
 import serverConfig from './config';
 import loggerService from './logger';
+import initProducer from './controllers/producer';
 
 // Init swagger docs
 const swaggerDocument = require('../../docs/swagger.json');
@@ -23,6 +24,9 @@ const server = require('http').Server(app);
 
 // Initialize logging mechanism
 loggerService.initLoggerService();
+
+// Initialize producer and consumer services
+initProducer();
 
 // Mongoose setup
 mongoose.Promise = global.Promise;

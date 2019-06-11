@@ -3,6 +3,8 @@ import cuid from 'cuid';
 import TransactionLog from '../models/transaction_log';
 import * as states from '../constants/states';
 import logger from '../logger';
+import { createJob } from './producer';
+import startConsumer from './consumer';
 
 /**
  * Open a transaction session.
@@ -57,7 +59,14 @@ export const openSession = async (req, res) => {
       overallStatus: states.transactionState.PENDING,
     });
 
+    // Create log entry
     await transactionLog.save();
+
+    // Produce jobs and trigger consumer
+    const jobId = `transaction-${sessionId}`;
+
+    generateJobs(jobId, input.transaction);
+    startConsumer(jobId);
 
     res.status(200).json({
       sessionId,
@@ -88,4 +97,16 @@ function initLogStatus(input) {
     index: item.index,
     state: states.transactionStepState.PENDING,
   }));
+}
+
+/**
+ * Helper to generate jobs for transaction steps.
+ */
+
+function generateJobs(jobId, transactionSteps = []) {
+  transactionSteps.forEach((item) => {
+    const priority = item.index;
+
+    createJob(jobId, item, priority);
+  });
 }
