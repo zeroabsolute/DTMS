@@ -11,6 +11,8 @@ export const postChargeValidator = (req, res, next) => {
     source: Joi.string().required(),
     description: Joi.string(),
     metadata: Joi.object(),
+    flightId: Joi.string(),
+    hotelId: Joi.string(),
   });
 
   const result = Joi.validate(req.body, bodySchema);

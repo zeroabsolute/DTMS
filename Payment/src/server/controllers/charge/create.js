@@ -33,6 +33,10 @@ import logger from '../../logger';
  *                type: string
  *              metadata:
  *                type: object
+ *              flightId:
+ *                type: string
+ *              hotelId:
+ *                type: string
  *      responses:
  *        200:
  *          description: Request processed successfully
@@ -46,12 +50,16 @@ import logger from '../../logger';
 
 export const addCharge = async (req, res) => {
   try {
+    const metadata = {
+      hotelId: req.body.hotelId,
+      flightId: req.body.flightId,
+    };
     const body = {
       amount: req.body.amount,
       currency: req.body.currency,
       source: req.body.source,
       description: req.body.description,
-      metadata: req.body.metadata ? JSON.stringify(req.body.metadata) : null,
+      metadata: req.body.metadata ? JSON.stringify({ ...req.body.metadata, ...metadata }) : JSON.stringify(metadata),
     };
 
     const result = await models.Charge.create(body);

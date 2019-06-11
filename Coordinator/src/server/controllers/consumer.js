@@ -1,3 +1,5 @@
+import request from 'request-promise';
+
 import logger from '../logger';
 import { getQueue } from './producer';
 import TransactionLog from '../models/transaction_log';
@@ -7,14 +9,10 @@ export default (name) => {
 
   queue.process(name, async (job, done) => {
     if (isTransaction(name)) {
-      await executeTransactionStep(name, job.data.operation);
-      done();
+      await executeTransactionStep(name, job.data.operation, done);
     } else {
-      await executeCompensationStep(name, job.data.compensation);
-      done();
+      await executeCompensationStep(name, job.data.compensation, done);
     }
-
-    done();
   });
 };
 
@@ -30,12 +28,14 @@ function isTransaction(name) {
  * Transaction execution logic.
  */
 
-async function executeTransactionStep(name, input) {
+async function executeTransactionStep(name, input, done) {
   try {
     const params = await prepareParams(name, input);
+    const result = await executeRequest(input.method, input.url, params);
     
+    done();
   } catch (e) {
-    throw e;
+    done(e);
   }
 }
 
@@ -97,9 +97,56 @@ async function prepareParams(name, input) {
   }
 
   const postBody = {
-    ...inputParams,
-    ...dependencyParams,
+    body: {
+      ...inputParams,
+      ...dependencyParams.body,
+    },
+    path: dependencyParams.path,
+    query: dependencyParams.query,
   };
 
   return postBody;
+}
+
+
+/**
+ * Helper function (3)
+ * 
+ * Purpose: Execute the request based on the generated params.
+ */
+
+async function executeRequest(method, uri, params) {
+  let finalUrl = uri;
+
+  // Add path params in url, if necessary
+  if (params.path && Object.keys(params.path).length) {
+    const pathParams = Object.values(params.path).join('/');
+
+    finalUrl = `${finalUrl}/${pathParams}`;
+  }
+
+  // Add query params if necessary
+  if (params.query && Object.keys(params.query).length) {
+    finalUrl = `${finalUrl}?`;
+
+    Object.keys(params.query).forEach((key) => {
+      finalUrl = `${finalUrl}key=${params.query[key]}`;  
+    });
+  }
+
+  // Construct request options
+  const options = {
+    method,
+    uri: finalUrl,
+  };
+
+  // Add body params if necessary
+  if (params.body && Object.keys(params.body).length) {
+    options.json = true;
+    options.body = params.body;
+  }
+  
+  const result = await request(options);
+
+  return result;
 }
