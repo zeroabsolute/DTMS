@@ -35,7 +35,10 @@ async function executeTransactionStep(name, input, done) {
     
     done();
   } catch (e) {
-    done(e);
+    done();
+
+    // Some error happened => start compensation
+    compensate();
   }
 }
 
@@ -43,8 +46,8 @@ async function executeTransactionStep(name, input, done) {
  * Compensation execution logic.
  */
 
-async function executeCompensationStep() {
-
+async function compensate() {
+  console.log('\n\nStarting compensation ...');
 }
 
 /**
