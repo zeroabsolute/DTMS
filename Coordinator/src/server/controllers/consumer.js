@@ -1,6 +1,7 @@
 import request from 'request-promise';
 
 import logger from '../logger';
+import * as states from '../constants/states';
 import { getQueue } from './producer';
 import TransactionLog from '../models/transaction_log';
 
@@ -9,12 +10,65 @@ export default (name) => {
 
   queue.process(name, async (job, done) => {
     if (isTransaction(name)) {
-      await executeTransactionStep(name, job.data.operation, done);
+      await executeTransactionStep(name, job.data, done);
     } else {
-      await executeCompensationStep(name, job.data.compensation, done);
+      await executeCompensationStep(name, job.data, done);
     }
   });
 };
+
+
+/**************************************************************************************/
+/**************************************************************************************/
+/* TRANSACTION JOB LOGIC (FORWARD & COMPENSATION)                                     */
+/**************************************************************************************/
+/**************************************************************************************/
+
+
+/**
+ * Transaction execution logic.
+ */
+
+async function executeTransactionStep(name, input, done) {
+  const transactionId = getTransactionId(name);
+
+  try {
+    await updateLogItem(transactionId, states.transactionStepState.STARTED, undefined, input.index);
+
+    const params = await prepareParams(name, input.operation);
+    const result = await executeRequest(input.operation.method, input.operation.url, params);
+    
+    await updateLogItem(transactionId, states.transactionStepState.SUCCEEDED, result, input.index);
+
+    done();
+  } catch (e) {
+    done();
+
+    await updateLogItem(transactionId, states.transactionStepState.FAILED, undefined, input.index);
+
+    // Some error happened => start compensation
+    generateCompensationJobs();
+  }
+}
+
+/**
+ * Compensation execution logic.
+ */
+
+function generateCompensationJobs() {
+  console.log('\n\nStarting compensation ...');
+}
+
+async function executeCompensationStep() {
+}
+
+
+/**************************************************************************************/
+/**************************************************************************************/
+/* HELPER FUNCTIONS                                                                   */
+/**************************************************************************************/
+/**************************************************************************************/
+
 
 /**
  * Helper function (1)
@@ -66,8 +120,7 @@ async function prepareParams(name, input) {
     const output = log.output;
     
     input.dependencies.forEach((item) => {
-      const indexToCheck = item.fromStep - 1;
-      const data = output[indexToCheck];
+      const data = output.find((element) => element.index === item.fromStep);
       
       if (data) {
         dependencyParams[item.paramType][item.outputParamKey] = data[item.inputParamKey];
@@ -129,37 +182,54 @@ async function executeRequest(method, uri, params) {
   return result;
 }
 
-
-/****************************************************/
-/* TRANSACTION JOB LOGIG (FORWARD & COMPENSATION)   */
-/****************************************************/
-
-
 /**
- * Transaction execution logic.
+ * Helper function (5)
+ * 
+ * Updates log for one of the jobs/steps of the whole transaction.
  */
 
-async function executeTransactionStep(name, input, done) {
-  try {
-    const params = await prepareParams(name, input);
-    const result = await executeRequest(input.method, input.url, params);
+async function updateLogItem(transactionId, status, output, index) {
+  const query = { transactionCuid: transactionId };
+  const log = await TransactionLog.findOne(query);
 
-    done();
-  } catch (e) {
-    done();
-
-    // Some error happened => start compensation
-    generateCompensationJobs();
+  if (!log) {
+    throw new Error('Log not found');
   }
-}
 
-/**
- * Compensation execution logic.
- */
+  // Update output for the transaction step
+  const newOutput = [];
 
-function generateCompensationJobs() {
-  console.log('\n\nStarting compensation ...');
-}
+  log.output.forEach((item) => {
+    if (item.index === index) {
+      newOutput.push({
+        ...item.toJSON(),
+        result: output,
+      });
+    } else {
+      newOutput.push(item);
+    }
+  });
 
-async function executeCompensationStep() {
+  // Update status for the transaction step
+  const newStatus = [];
+
+  log.status.forEach((item) => {
+    if (item.index === index) {
+      newStatus.push({
+        ...item.toJSON(),
+        state: status,
+      });
+    } else {
+      newStatus.push(item);
+    }
+  });
+
+  // Execute the update
+  const update = {
+    ...log.toJSON(),
+    status: newStatus,
+    output: newOutput,
+  };
+
+  await TransactionLog.findOneAndUpdate(query, update);
 }
