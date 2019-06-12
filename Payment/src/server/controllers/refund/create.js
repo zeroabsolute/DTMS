@@ -49,11 +49,10 @@ export const addRefund = async (req, res) => {
       amount: req.body.amount,
       chargeId: req.body.chargeId,
       description: req.body.description,
-      metadata: req.body.metadata ? JSON.stringify(req.body.metadata) : null,
+      metadata: req.body.metadata ? JSON.stringify(req.body.metadata) : "",
     };
 
     const existingRefunds = await models.Refund.findOne({ where: { chargeId: req.body.chargeId } });
-    console.log('HERE', existingRefunds);
     
     if (existingRefunds) {
       res.sendStatus(204);
