@@ -222,3 +222,22 @@ export async function generateCompensationJobs(transactionId) {
     createJob(jobId, { ...input[i].toJSON(), steps: i + 1 }, priority, attemptsPerCompensationJob);
   }
 }
+
+/**
+ * Helper function (8)
+ * 
+ * Calls the callbackUrl and posts the transaction results.
+ */
+
+export async function postTransactionResults(transactionId) {
+  const query = { transactionCuid: transactionId };
+  const log = await TransactionLog.findOne(query);
+  const options = {
+    method: 'POST',
+    uri: log.input.callbackUrl,
+    json: true,
+    body: log,
+  };
+  
+  await request(options);
+}

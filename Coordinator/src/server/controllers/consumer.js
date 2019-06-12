@@ -43,6 +43,7 @@ async function executeTransactionStep(name, input, done) {
     // If this is the last job => update overall transaction status
     if (input.index === input.steps) {
       await helpers.updateOverallLogStatus(transactionId, states.transactionState.FINISHED, states.actions.TRANSACTION);
+      await helpers.postTransactionResults(transactionId);
     }
 
     done();
@@ -77,6 +78,7 @@ async function executeCompensationStep(name, input, done) {
     // If this is the last job => update overall transaction status
     if (input.index === input.steps) {
       await helpers.updateOverallLogStatus(transactionId, states.transactionState.FINISHED, states.actions.COMPENSATION);
+      await helpers.postTransactionResults(transactionId);
     }
 
     done();
@@ -87,6 +89,7 @@ async function executeCompensationStep(name, input, done) {
 
     // Some error happened during compensation and all attemps failed => log the event and break
     await helpers.updateOverallLogStatus(transactionId, states.transactionState.FAILED, states.actions.COMPENSATION);
+    await helpers.postTransactionResults(transactionId);
   }
 }
 
