@@ -65,7 +65,7 @@ export const openSession = async (req, res) => {
     // Produce jobs and trigger consumer
     const jobId = `transaction-${sessionId}`;
 
-    generateJobs(jobId, input.transaction);
+    await generateJobs(jobId, input.transaction, sessionId);
     startConsumer(jobId);
 
     res.status(200).json({
@@ -103,10 +103,17 @@ function initLogStatus(input) {
  * Helper to generate jobs for transaction steps.
  */
 
-function generateJobs(jobId, transactionSteps = []) {
+async function generateJobs(jobId, transactionSteps = [], sessionId) {
+  // Job generation
   transactionSteps.forEach((item) => {
     const priority = item.index;
 
     createJob(jobId, item, priority);
   });
+
+  // Transaction log update -> set status 'started'
+  const query = { transactionCuid: sessionId };
+  const update = { overallStatus: states.transactionState.ONGOING };
+
+  await TransactionLog.findOneAndUpdate(query, update);
 }
