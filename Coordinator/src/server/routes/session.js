@@ -5,8 +5,6 @@ import * as SessionValidator from '../validators/session';
 
 const router = new Router();
 
-/** Create handlers */
-
 router.route('/session').post(
   SessionValidator.openSessionValidator,
   SessionController.openSession,

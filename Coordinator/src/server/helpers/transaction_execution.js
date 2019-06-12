@@ -3,6 +3,7 @@ import request from 'request-promise';
 import TransactionLog from '../models/transaction_log';
 import * as states from '../constants/states';
 import { createJob } from '../controllers/producer';
+import loggerService from '../logger';
 
 /**
  * Helper function (1)
@@ -230,14 +231,18 @@ export async function generateCompensationJobs(transactionId) {
  */
 
 export async function postTransactionResults(transactionId) {
-  const query = { transactionCuid: transactionId };
-  const log = await TransactionLog.findOne(query);
-  const options = {
-    method: 'POST',
-    uri: log.input.callbackUrl,
-    json: true,
-    body: log,
-  };
-  
-  await request(options);
+  try {
+    const query = { transactionCuid: transactionId };
+    const log = await TransactionLog.findOne(query);
+    const options = {
+      method: 'POST',
+      uri: log.input.callbackUrl,
+      json: true,
+      body: log,
+    };
+
+    await request(options);
+  } catch (e) {
+    loggerService.getLogger().error(e);
+  }
 }
