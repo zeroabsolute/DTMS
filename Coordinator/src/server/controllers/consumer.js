@@ -17,43 +17,9 @@ export default (name) => {
 };
 
 /**
- * Differentiate transactions and compensations.
- */
-
-function isTransaction(name) {
-  return !name.includes('compensation');
-}
-
-/**
- * Transaction execution logic.
- */
-
-async function executeTransactionStep(name, input, done) {
-  try {
-    const params = await prepareParams(name, input);
-    const result = await executeRequest(input.method, input.url, params);
-    
-    done();
-  } catch (e) {
-    done();
-
-    // Some error happened => start compensation
-    compensate();
-  }
-}
-
-/**
- * Compensation execution logic.
- */
-
-async function compensate() {
-  console.log('\n\nStarting compensation ...');
-}
-
-/**
  * Helper function (1)
  * 
- * Purpose: Extract transaction/session id from job name.
+ * Extracts transaction/session id from job name.
  */
 
 function getTransactionId(name) {
@@ -64,9 +30,19 @@ function getTransactionId(name) {
 /**
  * Helper function (2)
  * 
- * Purpose: Prepare the request body for job execution.
- *          Params can come directly from the request (in operation.params),
- *          or from the results of previously executed jobs (defined in operation.dependencies).
+ * Differentiates transactions and compensations.
+ */
+
+function isTransaction(name) {
+  return !name.includes('compensation');
+}
+
+/**
+ * Helper function (3)
+ * 
+ * Prepares the request body for job execution.
+ * Params can come directly from the request (in operation.params),
+ * or from the results of previously executed jobs (defined in operation.dependencies).
  */
 
 async function prepareParams(name, input) {
@@ -111,11 +87,10 @@ async function prepareParams(name, input) {
   return postBody;
 }
 
-
 /**
- * Helper function (3)
+ * Helper function (4)
  * 
- * Purpose: Execute the request based on the generated params.
+ * Executes the request based on the generated params.
  */
 
 async function executeRequest(method, uri, params) {
@@ -152,4 +127,39 @@ async function executeRequest(method, uri, params) {
   const result = await request(options);
 
   return result;
+}
+
+
+/****************************************************/
+/* TRANSACTION JOB LOGIG (FORWARD & COMPENSATION)   */
+/****************************************************/
+
+
+/**
+ * Transaction execution logic.
+ */
+
+async function executeTransactionStep(name, input, done) {
+  try {
+    const params = await prepareParams(name, input);
+    const result = await executeRequest(input.method, input.url, params);
+
+    done();
+  } catch (e) {
+    done();
+
+    // Some error happened => start compensation
+    generateCompensationJobs();
+  }
+}
+
+/**
+ * Compensation execution logic.
+ */
+
+function generateCompensationJobs() {
+  console.log('\n\nStarting compensation ...');
+}
+
+async function executeCompensationStep() {
 }
