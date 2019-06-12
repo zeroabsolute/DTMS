@@ -108,7 +108,7 @@ async function generateJobs(jobId, transactionSteps = [], sessionId) {
   transactionSteps.forEach((item) => {
     const priority = item.index;
 
-    createJob(jobId, item, priority);
+    createJob(jobId, { ...item, steps: transactionSteps.length }, priority);
   });
 
   // Transaction log update -> set status 'started'

@@ -12,8 +12,13 @@ let queue = null;
  * @param priority
  */
 
-export const createJob = (name, params, priority) => {
-  return queue.create(name, params).priority(priority).removeOnComplete(true).save();
+export const createJob = (name, params, priority, attempts = 1) => {
+  return queue.create(name, params)
+              .attempts(attempts)
+              .backoff({ type: 'exponential' })
+              .priority(priority)
+              .removeOnComplete(true)
+              .save();
 };
 
 /**
@@ -27,14 +32,14 @@ export default () => {
     logger.getLogger().debug(`
     Job enqueued:
     ID: ${id}
-    Name: ${name}\n\n
+    Name: ${name}
   `);
   });
 
   queue.on('job complete', (id, result) => {
     logger.getLogger().debug(`
     Job execution completed:
-    ID: ${id}\n\n
+    ID: ${id}
   `);
   });
 };

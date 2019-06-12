@@ -79,7 +79,9 @@ const Schema = mongoose.Schema;
  *          type: number
  *        state:
  *          type: string
- *          enum: [pending, started, succeeded, failed]
+ *          enum: [pending, 
+ *                transaction-started, transaction-succeeded, transaction-failed, 
+ *                compensation-started, compensation-succeeded, compensation-failed]
  *  TransactionLog:
  *    type: object
  *    required:
@@ -108,7 +110,10 @@ const Schema = mongoose.Schema;
  *        $ref: "#/definitions/TransactionStatus"
  *      overallStatus:
  *        type: string
- *        enum: [pending, ongoing, finished]
+ *        enum: [pending, ongoing, finished, failed]
+ *      lastAction:
+ *        type: string
+ *        enum: [transaction, compensation]
  */
 
 
@@ -189,6 +194,11 @@ const transactionLogSchema = new Schema(
       type: 'String', 
       required: true,
       enum: Object.values(states.transactionState),
+    },
+    lastAction: {
+      type: 'String',
+      required: false,
+      enum: Object.values(states.actions),
     }
   }, {
     timestamps: {
