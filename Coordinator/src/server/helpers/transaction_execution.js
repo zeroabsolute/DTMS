@@ -94,9 +94,10 @@ export async function executeRequest(method, uri, params) {
   // Add query params if necessary
   if (params.query && Object.keys(params.query).length) {
     finalUrl = `${finalUrl}?`;
+    const queryParamsCount = Object.keys(params.query).length;
 
-    Object.keys(params.query).forEach((key) => {
-      finalUrl = `${finalUrl}key=${params.query[key]}`;
+    Object.keys(params.query).forEach((key, index) => {
+      finalUrl = `${finalUrl}${key}=${params.query[key]}${index < queryParamsCount - 1 ? '&' : ''}`;
     });
   }
 
